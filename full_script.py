@@ -21,13 +21,9 @@ matplotlib.use('TkAgg')
 
 
 def clean_csv_headers(csv_file_path, output_file_path):
-    # Read the CSV file
     df = pd.read_csv(csv_file_path)
-    
-    # Get the first header ("Bellevue Nissan")
     first_header = df.columns[0]
     
-    # Replace all other headers with empty strings
     new_columns = [first_header] + [""] * (len(df.columns) - 1)
     df.columns = new_columns
     
@@ -42,13 +38,7 @@ def xls_to_csv_conversion(file_path):
         fengine = 'xlrd'
     else:
         raise ValueError("Unsupported file format")
-    '''
-    xls = pd.ExcelFile(file_path)
-    sheet_names = xls.sheet_names
-    excel_file = pd.read_excel("BellevueNissanReports sandbox.xlsx", sheet_name=sheet_names[0], engine=fengine)
-    excel_file.to_csv("tamp_output.csv", index=False)
-    return "tamp_output.csv"
-    '''
+    
     try:
         xls = pd.ExcelFile(file_path, engine='openpyxl')  # Explicit engine
         sheet_names = xls.sheet_names
@@ -60,7 +50,7 @@ def xls_to_csv_conversion(file_path):
         
         clean_csv_headers("tamp_output.csv", "tamp_output.csv")
 
-
+        # Chosen temporary .csv file for outputs (garbage)
         return "tamp_output.csv"
     except Exception as e:
         raise ValueError(f"Excel to CSV conversion failed: {str(e)}")
@@ -321,11 +311,11 @@ class FileProcessorApp:
     
     def _parse_dropped_files(self, data):
         try:
-            # Handle case where data is already a list
+            #Handle case where data is already a list
             if isinstance(data, (list, tuple)):
                 return [f.strip('{}') for f in data]
             
-            # Handle Windows paths (enclosed in curly braces)
+            #Handle Windows paths (enclosed in curly braces)
             if data.startswith('{') and data.endswith('}'):
                 return [data.strip('{}')]
             
@@ -333,7 +323,7 @@ class FileProcessorApp:
             if os.path.exists(data):
                 return [data]
             
-            # Fallback - split on spaces but try to reconstruct paths
+            #Fallback - split on spaces but try to reconstruct paths
             parts = data.split()
             possible_files = []
             current_file = parts[0]
@@ -358,12 +348,11 @@ class FileProcessorApp:
             messagebox.showwarning("Empty Queue", "No files to process")
             return
         
-        # Clear previous plots
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
         self.figures = []  
         
-        # Process files
+        #Process files in the queue
         for file_path in self.file_queue:
             try:
                 figures = self.generate_plots(file_path)  # Changed from QuickMake
@@ -406,13 +395,13 @@ class FileProcessorApp:
             # Create new image
             combined_img = Image.new('RGB', (max_width, total_height), (255, 255, 255))
             
-            # Paste all images vertically
+            # Paste all images 
             y_offset = 0
             for img in images:
                 combined_img.paste(img, (0, y_offset))
                 y_offset += img.size[1]
             
-            # Save the combined image
+            #Save the combined image
             save_path = filedialog.asksaveasfilename(
                 title="Save Combined Plots As",
                 defaultextension=".png",
@@ -427,7 +416,7 @@ class FileProcessorApp:
 
     def generate_plots(self, file_path):
         try:
-            figures = QuickMake(file_path)  # Gets ALL figures
+            figures = QuickMake(file_path) 
             return figures
         except Exception as e:
             print(f"Error in QuickMake: {e}")
@@ -447,8 +436,7 @@ class FileProcessorApp:
             canvas = FigureCanvasTkAgg(fig, master=frame)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-            
-            # Optional: Add save button per figure
+            # Save button
             save_btn = tk.Button(frame, text="Save Plot",
                                command=lambda f=fig: self.save_plot(f, file_path))
             save_btn.pack(side=tk.BOTTOM, pady=5)
